@@ -4,7 +4,7 @@ buildscript {
     }
     repositories {
         mavenCentral()
-        maven { url "https://plugins.gradle.org/m2/" }
+        jcenter()
         maven { url "https://repo.spring.io/snapshot" }
         maven { url "https://repo.spring.io/milestone" }
     }
@@ -31,6 +31,17 @@ subprojects {
         maven { url "https://repo.spring.io/milestone" }
     }
 
+    dependencies {
+        compile('org.springframework.boot:spring-boot-starter-data-jpa')
+        compile('org.springframework.boot:spring-boot-starter-data-rest')
+        compile('org.springframework.boot:spring-boot-starter-thymeleaf')
+        compile('org.springframework.boot:spring-boot-starter-web')
+        compile('org.springframework.boot:spring-boot-starter-websocket')
+        compile('org.springframework.boot:spring-boot-devtools')
+        runtime('com.h2database:h2')
+        testCompile('org.springframework.boot:spring-boot-starter-test')
+    }
+
     def nodeModulesDir = file("${project.projectDir}/node_modules")
 
     task createNodeModulesDir << {
@@ -53,7 +64,7 @@ subprojects {
         into 'src/main/resources/static/node_modules'
     }
 
-    task webJars(type: NodeTask) {
+    task webPack(type: NodeTask) {
         dependsOn copyNodeModules
         script = file("${project.projectDir}/node_modules/webpack/bin/webpack.js")
         execOverrides {
@@ -62,7 +73,7 @@ subprojects {
         }
     }
 
-    processResources.dependsOn webJars
+    processResources.dependsOn webPack
 
     eclipse {
         classpath {
