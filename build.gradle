@@ -14,79 +14,64 @@ buildscript {
     }
 }
 
-apply plugin: 'java'
-apply plugin: 'groovy'
-apply plugin: 'eclipse'
-apply plugin: 'spring-boot'
-apply plugin: 'com.moowork.node'
-
-jar {
-    baseName = 'examples.webpack'
-    version = '0.0.1-SNAPSHOT'
-}
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-repositories {
-    mavenCentral()
-    maven { url "https://repo.spring.io/snapshot" }
-    maven { url "https://repo.spring.io/milestone" }
-}
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'groovy'
+    apply plugin: 'eclipse'
+    apply plugin: 'spring-boot'
+    apply plugin: 'com.moowork.node'
 
 
-dependencies {
-    compile('org.springframework.boot:spring-boot-starter-data-jpa')
-    compile('org.springframework.boot:spring-boot-starter-data-rest')
-    compile('org.springframework.boot:spring-boot-starter-thymeleaf')
-    compile('org.springframework.boot:spring-boot-starter-web')
-    compile('org.springframework.boot:spring-boot-starter-websocket')
-    compile('org.springframework.boot:spring-boot-devtools')
-    //compile('org.springframework.boot:spring-boot-starter-security')
-    //compile('org.thymeleaf.extras:thymeleaf-extras-springsecurity4')
-    runtime('com.h2database:h2')
-    testCompile('org.springframework.boot:spring-boot-starter-test')
-}
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
-def nodeModulesDir = file("${project.projectDir}/node_modules")
-
-task createNodeModulesDir << {
-    if (!nodeModulesDir.isDirectory()){
-        nodeModulesDir.mkdirs()
+    repositories {
+        mavenCentral()
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
     }
-}
 
-node {
-    download = true
-    workDir = file("${project.projectDir}/node")
-    nodeModulesDir = nodeModulesDir
-}
+    def nodeModulesDir = file("${project.projectDir}/node_modules")
 
-npmInstall.dependsOn createNodeModulesDir
-
-task copyNodeModules(type: Copy){
-    dependsOn npmInstall
-    from 'node_modules'
-    into 'src/main/resources/static/node_modules'
-}
-
-task webJars(type: NodeTask){
-    dependsOn copyNodeModules
-    script = file("${project.projectDir}/node_modules/webpack/bin/webpack.js")
-    execOverrides {
-        it.ignoreExitValue = true
-        it.workingDir = file("${project.projectDir}/src/main/resources/static")
+    task createNodeModulesDir << {
+        if (!nodeModulesDir.isDirectory()) {
+            nodeModulesDir.mkdirs()
+        }
     }
-}
 
-processResources.dependsOn webJars
-
-eclipse {
-    classpath {
-        containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
-        containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8'
+    node {
+        download = true
+        workDir = file("${project.projectDir}/node")
+        nodeModulesDir = nodeModulesDir
     }
-}
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.12'
+    npmInstall.dependsOn createNodeModulesDir
+
+    task copyNodeModules(type: Copy) {
+        dependsOn npmInstall
+        from 'node_modules'
+        into 'src/main/resources/static/node_modules'
+    }
+
+    task webJars(type: NodeTask) {
+        dependsOn copyNodeModules
+        script = file("${project.projectDir}/node_modules/webpack/bin/webpack.js")
+        execOverrides {
+            it.ignoreExitValue = true
+            it.workingDir = file("${project.projectDir}/src/main/resources/static")
+        }
+    }
+
+    processResources.dependsOn webJars
+
+    eclipse {
+        classpath {
+            containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
+            containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8'
+        }
+    }
+
+    task wrapper(type: Wrapper) {
+        gradleVersion = '2.12'
+    }
 }
