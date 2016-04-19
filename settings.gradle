@@ -1,2 +1,4 @@
 include 'basic'
 include 'hypermedia'
+include 'conditional'
+include 'events'
