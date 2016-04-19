@@ -47,13 +47,21 @@ dependencies {
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
+def nodeModulesDir = file("${project.projectDir}/node_modules")
+
+task createNodeModulesDir << {
+    if (!nodeModulesDir.isDirectory()){
+        nodeModulesDir.mkdirs()
+    }
+}
 
 node {
     download = true
-
     workDir = file("${project.projectDir}/node")
-    nodeModulesDir = file("${project.projectDir}/node_modules")
+    nodeModulesDir = nodeModulesDir
 }
+
+npmInstall.dependsOn createNodeModulesDir
 
 task copyNodeModules(type: Copy){
     dependsOn npmInstall
